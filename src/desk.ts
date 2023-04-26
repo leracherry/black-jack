@@ -5,8 +5,11 @@ import { Deck } from "./deck";
 export class Desk extends PIXI.Container {
   private hitButton: PIXI.Sprite = Sprite.from("assets/button.png");
   private standButton: PIXI.Sprite = Sprite.from("assets/button.png");
+  private betButtonRight: PIXI.Sprite = Sprite.from("assets/bet_button.png");
+  private betButtonLeft: PIXI.Sprite = Sprite.from("assets/bet_button.png");
   private bets: number[] = [1, 2, 5, 10, 20];
   public deck: Deck = new Deck();
+  public currentBetIndex: number = 0;
 
   private textStyle: PIXI.TextStyle = new PIXI.TextStyle({
     fontSize: 27,
@@ -14,13 +17,17 @@ export class Desk extends PIXI.Container {
     lineJoin: "round",
   });
 
+  public textBetValue = new PIXI.Text(
+    this.bets[this.currentBetIndex],
+    this.textStyle
+  );
+
   constructor() {
     super();
     this.addHitButton();
     this.addStandButton();
-    this.displayUserBalance(1000);
-    this.addText();
     this.addChild(this.deck);
+    this.addBetButtons();
   }
 
   private addHitButton() {
@@ -37,7 +44,7 @@ export class Desk extends PIXI.Container {
     this.hitButton.addChild(textHitBtn);
 
     this.hitButton.on("pointerdown", (evt: MouseEvent) => {
-      this.deck.hit();
+      this.deck.hit(this.bets[this.currentBetIndex]);
     });
   }
 
@@ -55,29 +62,57 @@ export class Desk extends PIXI.Container {
     this.standButton.addChild(textStandBtn);
 
     this.standButton.on("pointerdown", (evt: MouseEvent) => {
-      this.deck.stand();
+      this.deck.stand(this.bets[this.currentBetIndex]);
     });
   }
 
-  private addText() {
-    const youText = new PIXI.Text("You: ", this.textStyle);
-    youText.anchor.set(0.5);
-    this.addChild(youText);
-    youText.x = 430;
-    youText.y = 280;
+  private addBetButtons() {
+    this.betButtonRight.rotation = 90 * PIXI.DEG_TO_RAD;
+    this.betButtonRight.anchor.set(0.5);
+    this.betButtonRight.scale.set(0.07);
+    this.betButtonRight.interactive = true;
+    this.betButtonRight.cursor = "pointer";
+    this.addChild(this.betButtonRight);
+    this.betButtonRight.x = 150;
+    this.betButtonRight.y = 550;
 
-    const dealerText = new PIXI.Text("Dealer: ", this.textStyle);
-    dealerText.anchor.set(0.5);
-    this.addChild(dealerText);
-    dealerText.x = 430;
-    dealerText.y = 30;
+    this.betButtonRight.on("pointerdown", (evt: MouseEvent) => {
+      this.displayNextBet();
+    });
+
+    this.addChild(this.textBetValue);
+    this.textBetValue.x = 90;
+    this.textBetValue.y = 535;
+
+    this.betButtonLeft.rotation = -90 * PIXI.DEG_TO_RAD;
+    this.betButtonLeft.anchor.set(0.5);
+    this.betButtonLeft.scale.set(0.07);
+    this.betButtonLeft.interactive = true;
+    this.betButtonLeft.cursor = "pointer";
+    this.addChild(this.betButtonLeft);
+    this.betButtonLeft.x = 50;
+    this.betButtonLeft.y = 550;
+
+    this.betButtonLeft.on("pointerdown", (evt: MouseEvent) => {
+      this.displayPreviousBet();
+    });
   }
 
-  public displayUserBalance(balance: number = 1000) {
-    const textBalance = new PIXI.Text(`Balance : ${balance}`, this.textStyle);
-    textBalance.anchor.set(0.5);
-    this.addChild(textBalance);
-    textBalance.x = 780;
-    textBalance.y = 570;
+  private displayNextBet(): void {
+    this.currentBetIndex++;
+    if (this.currentBetIndex >= this.bets.length) {
+      this.currentBetIndex = 0;
+    }
+    const nextBet: number = this.bets[this.currentBetIndex];
+    this.textBetValue.text = nextBet;
+  }
+
+  private displayPreviousBet(): void {
+    this.currentBetIndex--;
+    if (this.currentBetIndex < 0) {
+      this.currentBetIndex = this.bets.length - 1;
+    }
+    const previousBet: number = this.bets[this.currentBetIndex];
+    this.textBetValue.text = previousBet;
   }
 }
