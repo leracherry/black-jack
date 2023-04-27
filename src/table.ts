@@ -8,10 +8,10 @@ export class Table extends PIXI.Container {
   private betButtonRight: PIXI.Sprite = Sprite.from("assets/bet_button.png");
   private betButtonLeft: PIXI.Sprite = Sprite.from("assets/bet_button.png");
   private bets: number[] = [1, 2, 5, 10, 20];
-  public deck: Deck = new Deck();
-  public currentBetIndex: number = 0;
+  private deck: Deck = new Deck();
+  private currentBetIndex: number = 0;
 
-  public textBetValue = new PIXI.Text(
+  private textBetValue = new PIXI.Text(
     this.bets[this.currentBetIndex],
     this.deck.textStyle
   );

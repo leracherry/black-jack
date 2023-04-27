@@ -4,7 +4,7 @@ import { Table } from "./table";
 
 export class Game {
   private app: PIXI.Application;
-  public table: Table = new Table();
+  private table: Table = new Table();
   private filtersContainer: PIXI.Container;
   private dimmingLayer: PIXI.Graphics;
   private startButton: PIXI.Sprite = Sprite.from("assets/start.png");
@@ -54,7 +54,7 @@ export class Game {
     this.applyFilters(true);
   }
 
-  public initializeStartButton() {
+  private initializeStartButton() {
     this.startButton.anchor.set(0.5);
     this.startButton.scale.set(0.5);
     this.startButton.interactive = true;

@@ -2,17 +2,17 @@ import * as PIXI from "pixi.js";
 import { Sprite } from "pixi.js";
 
 export class Deck extends PIXI.Container {
-  public dealerSum: number = 0;
-  public yourSum: number = 0;
+  private dealerSum: number = 0;
+  private playerSum: number = 0;
 
   private dealerAceCount: number = 0;
-  private yourAceCount = 0;
+  private playerAceCount = 0;
   private hidden: any;
-  public widthDealerDeck: number = 320;
-  public message: string = "";
-  public widthHitDeck: number = 440;
-  private canHit: boolean = true; //allows the player (you) to draw while yourSum <= 21
-  public values: string[] = [
+  private dealerDeckX: number = 320;
+  private message: string = "";
+  private widthHitDeck: number = 440;
+  private canHit: boolean = true; //allows player to draw while yourSum <= 21
+  private values: string[] = [
     "A",
     "2",
     "3",
@@ -27,8 +27,8 @@ export class Deck extends PIXI.Container {
     "Q",
     "K",
   ];
-  public types: string[] = ["C", "D", "H", "S"];
-  public deck: string[] = [];
+  private types: string[] = ["C", "D", "H", "S"];
+  private deck: string[] = [];
 
   public textStyle: PIXI.TextStyle = new PIXI.TextStyle({
     fontSize: 30,
@@ -36,18 +36,13 @@ export class Deck extends PIXI.Container {
     lineJoin: "round",
   });
 
-  private endGameText: PIXI.TextStyle = new PIXI.TextStyle({
-    fontSize: 50,
-    fill: "#3a3a3a",
-    lineJoin: "round",
-  });
-  public dealerSumText: PIXI.Text = new PIXI.Text("Dealer: ", this.textStyle);
-  public yourSumText: PIXI.Text = new PIXI.Text("You: ", this.textStyle);
-  public textBalance = new PIXI.Text("Balance: 1000", this.textStyle);
-  public userBalance: number = 1000;
-  public betDone: boolean = false;
-  public balanceUpdated: boolean = false;
-  public textHitBtn = new PIXI.Text("", this.endGameText);
+  private dealerSumText: PIXI.Text = new PIXI.Text("Dealer: ", this.textStyle);
+  private yourSumText: PIXI.Text = new PIXI.Text("You: ", this.textStyle);
+  private textBalance = new PIXI.Text("Balance: 1000", this.textStyle);
+  private userBalance: number = 1000;
+  private betDone: boolean = false;
+  private balanceUpdated: boolean = false;
+  private gameOverText = new PIXI.Text("", this.textStyle);
 
   constructor() {
     super();
@@ -58,7 +53,7 @@ export class Deck extends PIXI.Container {
     this.displayUserBalance(this.userBalance);
   }
 
-  public buildDeck() {
+  private buildDeck() {
     for (let i: number = 0; i < this.types.length; i++) {
       for (let j = 0; j < this.values.length; j++) {
         this.deck.push(this.values[j] + "-" + this.types[i]); //A-C -> K-C, A-D -> K-D
@@ -66,7 +61,7 @@ export class Deck extends PIXI.Container {
     }
   }
 
-  public shuffleDeck() {
+  private shuffleDeck() {
     for (let i: number = 0; i < this.deck.length; i++) {
       let j = Math.floor(Math.random() * this.deck.length); // (0-1) * 52 => (0-51.9999)
       let temp = this.deck[i];
@@ -75,14 +70,32 @@ export class Deck extends PIXI.Container {
     }
   }
 
-  public startGame() {
+  private startGame() {
+    let cardBack: PIXI.Sprite = Sprite.from("assets/cards/BACK.png");
+    cardBack.anchor.set(0.5);
+    cardBack.scale.set(0.22);
+    this.addChild(cardBack);
+    cardBack.x = 200;
+    cardBack.y = 150;
+
     this.dealerSum = 0;
-    this.yourSum = 0;
+    this.playerSum = 0;
     this.dealerAceCount = 0;
-    this.yourAceCount = 0;
+    this.playerAceCount = 0;
     this.hidden = this.deck.pop();
     this.dealerSum += this.getValue(this.hidden);
     this.dealerAceCount += this.checkAce(this.hidden);
+
+    let card = this.deck.pop();
+    let cardImg = Sprite.from(`assets/cards/${card}.png`);
+    cardImg.anchor.set(0.5);
+    cardImg.scale.set(0.22);
+    this.addChild(cardImg);
+    cardImg.x = this.dealerDeckX;
+    cardImg.y = 150;
+    this.dealerDeckX += 120;
+    this.dealerSum += this.getValue(card);
+    this.dealerAceCount += this.checkAce(card);
 
     for (let i: number = 0; i < 2; i++) {
       const width = 200 + i * 120;
@@ -93,44 +106,13 @@ export class Deck extends PIXI.Container {
       this.addChild(cardImg);
       cardImg.x = width;
       cardImg.y = 400;
-      this.yourSum += this.getValue(card);
-      this.yourAceCount += this.checkAce(card);
-    }
-
-    let cardBack: PIXI.Sprite = Sprite.from("assets/cards/BACK.png");
-    cardBack.anchor.set(0.5);
-    cardBack.scale.set(0.22);
-    this.addChild(cardBack);
-    cardBack.x = 200;
-    cardBack.y = 150;
-
-    let card = this.deck.pop();
-    let cardImg: PIXI.Sprite = Sprite.from(`assets/cards/${card}.png`);
-    cardImg.anchor.set(0.5);
-    cardImg.scale.set(0.22);
-    this.addChild(cardImg);
-    cardImg.x = this.widthDealerDeck;
-    this.widthDealerDeck += 120;
-    cardImg.y = 150;
-
-    this.dealerSum += this.getValue(card);
-    this.dealerAceCount += this.checkAce(card);
-
-    while (this.dealerSum < 17) {
-      card = this.deck.pop();
-      cardImg = Sprite.from(`assets/cards/${card}.png`);
-      cardImg.anchor.set(0.5);
-      cardImg.scale.set(0.22);
-      this.addChild(cardImg);
-      cardImg.x = this.widthDealerDeck;
-      this.widthDealerDeck += 120;
-      cardImg.y = 150;
-      this.dealerSum += this.getValue(card);
-      this.dealerAceCount += this.checkAce(card);
+      this.playerSum += this.getValue(card);
+      this.playerAceCount += this.checkAce(card);
+      console.log("add your sum", this.getValue(card));
     }
   }
 
-  public getValue(card: any) {
+  private getValue(card: any) {
     let data = card.split("-"); // "4-C" -> ["4", "C"]
     let value: any = data[0];
 
@@ -152,37 +134,55 @@ export class Deck extends PIXI.Container {
   }
 
   public hit(betValue: number) {
-    if (!this.betDone) {
-      this.userBalance -= betValue;
-      this.displayUserBalance(this.userBalance);
-      this.betDone = true;
-    }
-    if (!this.canHit) {
-      return;
-    }
+    if (this.userBalance > 0) {
+      if (!this.betDone) {
+        this.userBalance -= betValue;
+        this.displayUserBalance(this.userBalance);
+        this.betDone = true;
+      }
+      if (!this.canHit) {
+        return;
+      }
 
-    let card = this.deck.pop();
-    let cardImg: PIXI.Sprite = Sprite.from(`assets/cards/${card}.png`);
-    cardImg.anchor.set(0.5);
-    cardImg.scale.set(0.22);
-    this.addChild(cardImg);
-    cardImg.x = this.widthHitDeck;
-    this.widthHitDeck += 120;
-    cardImg.y = 400;
+      let card = this.deck.pop();
+      let cardImg: PIXI.Sprite = Sprite.from(`assets/cards/${card}.png`);
+      cardImg.anchor.set(0.5);
+      cardImg.scale.set(0.22);
+      this.addChild(cardImg);
+      cardImg.x = this.widthHitDeck;
+      this.widthHitDeck += 120;
+      cardImg.y = 400;
 
-    this.yourSum += this.getValue(card);
-    this.yourAceCount += this.checkAce(card);
-    this.addChild(cardImg);
+      this.playerSum += this.getValue(card);
+      this.playerAceCount += this.checkAce(card);
+      this.addChild(cardImg);
 
-    if (this.reduceAce(this.yourSum, this.yourAceCount) > 21) {
-      //A, J, 8 -> 1 + 10 + 8
-      this.canHit = false;
+      if (this.reduceAce(this.playerSum, this.playerAceCount) > 21) {
+        //A, J, 8 -> 1 + 10 + 8
+        this.canHit = false;
+      }
+    } else {
+      this.message = "Low balance";
+      this.initializeGameOverText();
+      this.updateGameOverText(this.message);
     }
   }
 
   public stand(betValue: number) {
+    while (this.dealerSum < 17) {
+      const card = this.deck.pop();
+      const cardImg = Sprite.from(`assets/cards/${card}.png`);
+      cardImg.anchor.set(0.5);
+      cardImg.scale.set(0.22);
+      this.addChild(cardImg);
+      cardImg.x = this.dealerDeckX;
+      this.dealerDeckX += 120;
+      cardImg.y = 150;
+      this.dealerSum += this.getValue(card);
+      this.dealerAceCount += this.checkAce(card);
+    }
     this.dealerSum = this.reduceAce(this.dealerSum, this.dealerAceCount);
-    this.yourSum = this.reduceAce(this.yourSum, this.yourAceCount);
+    this.playerSum = this.reduceAce(this.playerSum, this.playerAceCount);
     if (!this.betDone) {
       this.userBalance -= betValue;
       this.displayUserBalance(this.userBalance);
@@ -197,35 +197,35 @@ export class Deck extends PIXI.Container {
 
     hiddenImg.y = 150;
 
-    if (this.yourSum > 21) {
+    if (this.playerSum > 21) {
       this.message = "You lose!";
     } else if (this.dealerSum > 21) {
       this.message = "You win!";
       this.userBalance += betValue * 2;
     }
     //both you and dealer <= 21
-    else if (this.yourSum == this.dealerSum) {
-      this.message = "Tie!";
+    else if (this.playerSum == this.dealerSum) {
+      this.message = "Tie! ";
       this.userBalance += betValue / 2;
-    } else if (this.yourSum > this.dealerSum) {
-      this.message = "You win!";
+    } else if (this.playerSum > this.dealerSum) {
+      this.message = "You win! ";
       this.userBalance += betValue * 2;
-    } else if (this.yourSum < this.dealerSum) {
-      this.message = "You lose!";
+    } else if (this.playerSum < this.dealerSum) {
+      this.message = "You lose! ";
     }
 
     setTimeout(() => {
       this.initializeGameOverText();
-    }, 1500);
-    this.updateEndButtonText(this.message);
-    this.addCurrentBalanceText(this.yourSum, this.dealerSum);
+    }, 1000);
+    this.updateGameOverText(this.message);
+    this.addCurrentBalanceText(this.playerSum, this.dealerSum);
     if (!this.balanceUpdated) {
       this.displayUserBalance(this.userBalance);
       this.balanceUpdated = true;
     }
   }
 
-  public reduceAce(playerSum: number, playerAceCount: number) {
+  private reduceAce(playerSum: number, playerAceCount: number) {
     while (playerSum > 21 && playerAceCount > 0) {
       playerSum -= 10;
       playerAceCount -= 1;
@@ -233,7 +233,7 @@ export class Deck extends PIXI.Container {
     return playerSum;
   }
 
-  public initializeText() {
+  private initializeText() {
     this.yourSumText.anchor.set(0.5);
     this.addChild(this.yourSumText);
     this.yourSumText.x = 430;
@@ -255,40 +255,41 @@ export class Deck extends PIXI.Container {
     this.dealerSumText.text = "Dealer: " + dealerSum;
   }
 
-  public displayUserBalance(balance: number) {
+  private displayUserBalance(balance: number) {
     this.textBalance.text = "Balance:" + balance;
   }
 
-  public initializeGameOverText() {
-    const endButton: PIXI.Sprite = Sprite.from("assets/text_space.png");
-    endButton.anchor.set(0.5);
-    endButton.interactive = true;
-    endButton.cursor = "pointer";
-    endButton.x = 425;
-    endButton.y = 325;
-    this.addChild(endButton);
+  private initializeGameOverText() {
+    const gameOverButton: PIXI.Sprite = Sprite.from("assets/text_space.png");
+    gameOverButton.anchor.set(0.5);
+    gameOverButton.interactive = true;
+    gameOverButton.cursor = "pointer";
+    gameOverButton.x = 425;
+    gameOverButton.y = 325;
+    this.addChild(gameOverButton);
 
-    this.textHitBtn.anchor.set(0.5);
-    endButton.addChild(this.textHitBtn);
+    gameOverButton.anchor.set(0.5);
+    this.gameOverText.anchor.set(0.5);
+    gameOverButton.addChild(this.gameOverText);
 
-    endButton.on("pointerdown", (evt: MouseEvent) => {
+    gameOverButton.on("pointerdown", (evt: MouseEvent) => {
       this.cleanDeck();
-      endButton.destroy();
+      gameOverButton.destroy();
     });
   }
 
-  public updateEndButtonText(text: string) {
-    this.textHitBtn.text = text;
+  private updateGameOverText(text: string) {
+    this.gameOverText.text = text + "Press to start";
   }
 
-  public cleanDeck() {
+  private cleanDeck() {
     this.deck = [];
     this.removeChildren();
     this.dealerSum = 0;
-    this.yourSum = 0;
+    this.playerSum = 0;
     this.dealerAceCount = 0;
-    this.yourAceCount = 0;
-    this.widthDealerDeck = 320;
+    this.playerAceCount = 0;
+    this.dealerDeckX = 320;
     this.message = "";
     this.widthHitDeck = 440;
     this.canHit = true;
