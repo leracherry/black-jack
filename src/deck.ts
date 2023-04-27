@@ -215,7 +215,7 @@ export class Deck extends PIXI.Container {
     }
 
     setTimeout(() => {
-      this.initializeEndButton();
+      this.initializeGameOverText();
     }, 1500);
     this.updateEndButtonText(this.message);
     this.addCurrentBalanceText(this.yourSum, this.dealerSum);
@@ -259,13 +259,13 @@ export class Deck extends PIXI.Container {
     this.textBalance.text = "Balance:" + balance;
   }
 
-  public initializeEndButton() {
+  public initializeGameOverText() {
     const endButton: PIXI.Sprite = Sprite.from("assets/text_space.png");
     endButton.anchor.set(0.5);
     endButton.interactive = true;
     endButton.cursor = "pointer";
-    endButton.x = 350;
-    endButton.y = 250;
+    endButton.x = 425;
+    endButton.y = 325;
     this.addChild(endButton);
 
     this.textHitBtn.anchor.set(0.5);
