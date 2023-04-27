@@ -1,7 +1,10 @@
 {
   "dependencies": {
+    "@types/gsap": "^3.0.0",
     "copy-webpack-plugin": "^11.0.0",
+    "gsap": "^3.11.5",
     "html-webpack-plugin": "^5.5.1",
+    "pixi-filters": "^5.2.1",
     "pixi-ui": "^1.0.0",
     "pixi.js": "^7.2.4",
     "terser-webpack-plugin": "^5.3.7",

@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import { Sprite } from "pixi.js";
 import { Deck } from "./deck";
 
-export class Desk extends PIXI.Container {
+export class Table extends PIXI.Container {
   private hitButton: PIXI.Sprite = Sprite.from("assets/button.png");
   private standButton: PIXI.Sprite = Sprite.from("assets/button.png");
   private betButtonRight: PIXI.Sprite = Sprite.from("assets/bet_button.png");
@@ -11,15 +11,9 @@ export class Desk extends PIXI.Container {
   public deck: Deck = new Deck();
   public currentBetIndex: number = 0;
 
-  private textStyle: PIXI.TextStyle = new PIXI.TextStyle({
-    fontSize: 27,
-    fill: "#403624",
-    lineJoin: "round",
-  });
-
   public textBetValue = new PIXI.Text(
     this.bets[this.currentBetIndex],
-    this.textStyle
+    this.deck.textStyle
   );
 
   constructor() {
@@ -39,7 +33,7 @@ export class Desk extends PIXI.Container {
     this.hitButton.x = 350;
     this.hitButton.y = 550;
 
-    const textHitBtn = new PIXI.Text("HIT", this.textStyle);
+    const textHitBtn = new PIXI.Text("HIT", this.deck.textStyle);
     textHitBtn.anchor.set(0.5);
     this.hitButton.addChild(textHitBtn);
 
@@ -57,7 +51,7 @@ export class Desk extends PIXI.Container {
     this.standButton.x = 500;
     this.standButton.y = 550;
 
-    const textStandBtn = new PIXI.Text("STAND", this.textStyle);
+    const textStandBtn = new PIXI.Text("STAND", this.deck.textStyle);
     textStandBtn.anchor.set(0.5);
     this.standButton.addChild(textStandBtn);
 
@@ -67,7 +61,6 @@ export class Desk extends PIXI.Container {
   }
 
   private addBetButtons() {
-    this.betButtonRight.rotation = 90 * PIXI.DEG_TO_RAD;
     this.betButtonRight.anchor.set(0.5);
     this.betButtonRight.scale.set(0.07);
     this.betButtonRight.interactive = true;
@@ -84,7 +77,7 @@ export class Desk extends PIXI.Container {
     this.textBetValue.x = 90;
     this.textBetValue.y = 535;
 
-    this.betButtonLeft.rotation = -90 * PIXI.DEG_TO_RAD;
+    this.betButtonLeft.rotation = 180 * PIXI.DEG_TO_RAD;
     this.betButtonLeft.anchor.set(0.5);
     this.betButtonLeft.scale.set(0.07);
     this.betButtonLeft.interactive = true;
