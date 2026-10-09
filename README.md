@@ -2,7 +2,7 @@
 
 **A little Vegas, a lot of vibe.** Just you, the dealer, and the next card.
 
-A browser blackjack game with deep green felt, gold chips, and a tiny house edge on your afternoon productivity. Built with TypeScript and PixiJS. No account, no real money — just chase 21.
+A browser blackjack game with deep green felt, gold chips, and a tiny house edge on your afternoon productivity. Built with TypeScript and PixiJS. No account, no real money. Just chase 21.
 
 ![Blackjack on a green felt table with gold controls](docs/screenshots/desktop.png)
 

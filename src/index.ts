@@ -63,13 +63,13 @@ function render(): void {
   hit.disabled = stand.disabled = !playing;
   reset.hidden = !broke;
   element('dealer-score').textContent = !game.dealer.length
-    ? '—'
+    ? '-'
     : playing
       ? `${handValue([game.dealer[0]])} + ?`
       : String(handValue(game.dealer));
   element('player-score').textContent = game.player.length
     ? String(handValue(game.player))
-    : '—';
+    : '-';
   const messages = {
     blackjack: `Blackjack. Beautiful. You won ${format.format(game.bet * 1.5)} chips!`,
     win: `That’s your hand. You won ${game.bet} chips!`,
