@@ -1,14 +1,23 @@
 # ♠ Blackjack
 
-**A little Vegas, a lot of vibe.** Just you, the dealer, and the next card.
+A clean browser blackjack game built with **TypeScript and PixiJS**. Green felt, gold chips, and quick hands against the dealer. No account or real money required.
 
-A browser blackjack game with deep green felt, gold chips, and a tiny house edge on your afternoon productivity. Built with TypeScript and PixiJS. No account, no real money. Just chase 21.
+[![CI](https://github.com/leracherry/black-jack/actions/workflows/ci.yml/badge.svg)](https://github.com/leracherry/black-jack/actions/workflows/ci.yml)
 
-![Blackjack on a green felt table with gold controls](docs/screenshots/desktop.png)
+![Desktop blackjack table with dealer cards, player cards, and betting controls](docs/screenshots/desktop.png)
 
-## Deal yourself in
+## Features
 
-Use **Node.js 22.12+** (or 20.19+) and npm.
+- Responsive table for desktop and mobile.
+- Five chip values, a session bankroll, and hand and win counters.
+- Keyboard shortcuts, visible focus states, and accessible HTML controls.
+- Card descriptions for screen readers and live hand result announcements.
+- Built-in rules dialog and a fresh start when you run out of chips.
+- Local card assets with no external fonts or CDN scripts.
+
+## Run locally
+
+Use **Node.js 24** and npm. The project also supports Node.js 20.19+ or 22.12+.
 
 ```sh
 git clone git@github.com:leracherry/black-jack.git
@@ -17,68 +26,94 @@ npm ci
 npm start
 ```
 
-Open **http://localhost:8000**. Pick your chips, hit **Deal me in**, and make your move.
+Open **http://localhost:8000**.
 
-## The house rules
+1. Choose a bet.
+2. Select **Deal me in**.
+3. **Hit** to draw another card or **Stand** to keep your hand.
+4. Select **Next hand** after the result.
 
-- Start with **1,000 pretend chips**. Choose a bet of 10, 25, 50, 100, or 250.
-- **Hit** to draw another card; **Stand** to keep your hand. Keyboard shortcuts: **H** and **S**.
-- Get closer to **21** than the dealer without going over. Aces count as 1 or 11; face cards count as 10.
-- The dealer draws to 17 and **stands on soft 17**. Reaching 21 automatically stands your hand.
-- A regular win pays **1:1**, a two-card blackjack pays **3:2**, and a tie returns the **entire stake**. Both natural blackjacks tie.
-- Your bet locks when the cards are dealt. Every hand uses a freshly shuffled 52-card deck.
-- No splitting, doubling, or insurance. Run out of chips? **Fresh start** is on the house.
+| Control     | Shortcut | Action              |
+| ----------- | -------- | ------------------- |
+| Hit         | `H`      | Draw a card         |
+| Stand       | `S`      | Finish your turn    |
+| How to play |          | Open the rules      |
+| Close rules | `Esc`    | Return to the table |
 
-The bankroll stays in the current session. Refreshing resets it. All chips are make-believe.
+## Rules and payouts
 
-## Small screen, same table
+Get closer to **21** than the dealer without going over.
 
-HTML buttons, visible focus states, keyboard shortcuts, live score announcements, and a rules dialog keep the controls usable beyond the canvas. The card table adjusts to smaller screens.
+- Start with **1,000 pretend chips**. Bet 10, 25, 50, 100, or 250 chips.
+- Face cards count as 10. Aces count as 1 or 11, whichever keeps your hand strongest without busting.
+- The dealer draws to 17 and stands on all 17s, including soft 17.
+- A player hand reaching 21 stands automatically. A bust ends the hand immediately.
+- A two-card blackjack beats a regular 21. Two natural blackjacks tie.
+- Bets lock when you deal. Each hand uses a freshly shuffled 52-card deck.
+- Splitting, doubling, and insurance are not included.
 
-<img src="docs/screenshots/mobile.png" alt="Blackjack on a phone-sized screen" width="300" />
+| Result            | Net payout     | With a 100-chip bet                     |
+| ----------------- | -------------- | --------------------------------------- |
+| Win               | 1:1            | Receive 200 chips, including your stake |
+| Natural blackjack | 3:2            | Receive 250 chips, including your stake |
+| Tie               | Stake returned | Receive your 100 chips back             |
+| Loss              | Stake lost     | Receive 0 chips                         |
+
+Your bankroll lasts for the current page session. Refreshing resets it. If you cannot afford the smallest bet, **Fresh start** resets the bankroll and session counters.
+
+## Screenshots
+
+### Mobile
+
+<img src="docs/screenshots/mobile.png" alt="Mobile blackjack table with chip selection and hit and stand buttons" width="300" />
 
 <details>
-<summary>See a finished hand</summary>
+<summary>Finished hand</summary>
 
-![Completed hand with revealed dealer cards and result](docs/screenshots/result.png)
+![Completed hand with revealed dealer cards and the outcome](docs/screenshots/result.png)
 
 </details>
 
-## Work on the game
+## Development
 
-| Command                | What it does                                          |
-| ---------------------- | ----------------------------------------------------- |
-| `npm start`            | Start the local development server                    |
-| `npm test`             | Run scoring, game flow, and bankroll regression tests |
-| `npm run typecheck`    | Check TypeScript without generating files             |
-| `npm run build`        | Type-check and build the production site into `dist/` |
-| `npm run preview`      | Serve the production build locally                    |
-| `npm run format`       | Format the source and docs                            |
-| `npm run format:check` | Check formatting without changing files               |
+| Command                | Purpose                                     |
+| ---------------------- | ------------------------------------------- |
+| `npm start`            | Start the development server                |
+| `npm test`             | Run game-rule and bankroll regression tests |
+| `npm run typecheck`    | Check TypeScript                            |
+| `npm run build`        | Type-check and build to `dist/`             |
+| `npm run preview`      | Serve the production build locally          |
+| `npm run format`       | Format source files and documentation       |
+| `npm run format:check` | Verify formatting                           |
 
-The stack is deliberately small: **PixiJS** draws the cards, **TypeScript** keeps the rules explicit, **Vite** handles development and builds, **Vitest** checks the game logic, and **Prettier** keeps things tidy.
+**PixiJS** renders the cards. **Vite** handles development and builds. **Vitest** tests the game logic, and **Prettier** formats the code. GitHub Actions runs formatting checks, tests, and the production build on pushes to `main` or `master` and on pull requests.
 
 ```text
 src/
-  cards.ts       # Typed cards, Fisher–Yates shuffle, ace-aware scoring
-  game.ts        # Hand lifecycle, wager locking, outcomes, payouts
-  table.ts       # PixiJS card renderer and responsive canvas
-  index.ts       # HTML controls, announcements, keyboard input
+  cards.ts          Typed cards, shuffle, and hand scoring
+  game.ts           Hand lifecycle, wagers, and payouts
+  table.ts          PixiJS renderer and responsive canvas
+  index.ts          Controls, keyboard input, and announcements
 public/
-  assets/cards/  # Original card artwork
-style.css        # Felt, chips, typography, responsive layouts
-tests/           # Game-rule regression tests
-docs/screenshots/# Real desktop, mobile, and finished-hand captures
+  assets/cards/     Card artwork
+style.css           Table styling and responsive layouts
+tests/              Game-rule regression tests
+docs/screenshots/   Desktop, mobile, and result screenshots
 ```
 
-Game rules stay separate from rendering, so you can test a hand without a browser or change the table without changing payouts. GitHub Actions runs formatting, tests, and the production build on pushes and pull requests.
+Game rules are separate from rendering, so scoring and payouts can be tested without a browser.
 
-## Put it on a table of your own
+## Build and deploy
 
-Run `npm run build` and deploy `dist/` to a static host. For a subdirectory such as GitHub Pages, build with the matching base path:
+```sh
+npm run build
+npm run preview
+```
+
+Deploy the contents of `dist/` to a static host. For a site served from a subdirectory, set the base path when building:
 
 ```sh
 npm run build -- --base=/black-jack/
 ```
 
-Serve the built files over HTTP rather than opening `index.html` directly. Card artwork is included locally; the game has no external font or CDN dependency.
+Serve the files over HTTP. Opening the built HTML directly from the filesystem will not load the game correctly.
