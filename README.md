@@ -1,4 +1,4 @@
-# ♠ Blackjack — Take a seat.
+# ♠ Blackjack
 
 **A little Vegas, a lot of vibe.** Just you, the dealer, and the next card.
 
