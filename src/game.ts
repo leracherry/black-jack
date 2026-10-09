@@ -20,7 +20,11 @@ export class Blackjack {
   constructor(private readonly deckFactory: () => Card[] = createDeck) {}
 
   setBet(amount: number): void {
-    if (this.phase !== 'playing' && BETS.some(bet => bet === amount) && amount <= this.balance) {
+    if (
+      this.phase !== 'playing' &&
+      BETS.some((bet) => bet === amount) &&
+      amount <= this.balance
+    ) {
       this.bet = amount;
     }
   }
@@ -34,7 +38,13 @@ export class Blackjack {
     this.player = [this.draw(), this.draw()];
     this.dealer = [this.draw(), this.draw()];
     if (isBlackjack(this.player) || isBlackjack(this.dealer)) {
-      this.settle(isBlackjack(this.player) ? isBlackjack(this.dealer) ? 'push' : 'blackjack' : 'lose');
+      this.settle(
+        isBlackjack(this.player)
+          ? isBlackjack(this.dealer)
+            ? 'push'
+            : 'blackjack'
+          : 'lose',
+      );
     }
   }
 
@@ -51,7 +61,13 @@ export class Blackjack {
     while (handValue(this.dealer) < 17) this.dealer.push(this.draw());
     const player = handValue(this.player);
     const dealer = handValue(this.dealer);
-    this.settle(dealer > 21 || player > dealer ? 'win' : player === dealer ? 'push' : 'lose');
+    this.settle(
+      dealer > 21 || player > dealer
+        ? 'win'
+        : player === dealer
+          ? 'push'
+          : 'lose',
+    );
   }
 
   reset(): void {

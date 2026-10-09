@@ -1,24 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-        #game-canvas {
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
-    <title>Black Jack Game</title>
-</head>
-
-<body>
-
-    <canvas id="game-canvas" width="900" height="600"></canvas>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#09271f" />
+    <meta
+      name="description"
+      content="A little Vegas, a lot of vibe. Play blackjack on a beautiful felt table, right in your browser."
+    />
+    <title>Blackjack — Take a seat.</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <a class="brand" href="./" aria-label="Blackjack home"
+          ><span class="brand-mark">♠</span> BLACKJACK<span class="brand-dot"
+            >.</span
+          ></a
+        >
+        <span class="table-number"
+          ><span class="live-dot"></span> TABLE 01 · ALWAYS OPEN</span
+        >
+        <button id="rules-button" class="text-button" aria-haspopup="dialog">
+          How to play <span aria-hidden="true">↗</span>
+        </button>
+      </header>
+      <section class="intro" aria-labelledby="title">
+        <div>
+          <p class="eyebrow">GOOD CARDS. GREAT COMPANY.</p>
+          <h1 id="title">Take a seat.<br /><em>Try your luck.</em></h1>
+        </div>
+        <p class="intro-copy">
+          A little Vegas, a lot of vibe.<br />Just you, the dealer, and the next
+          card.
+        </p>
+      </section>
+      <section class="game" aria-label="Blackjack table">
+        <div class="table-top">
+          <span>THE HOUSE TABLE</span
+          ><span
+            >BLACKJACK PAYS 3:2 <span class="divider">/</span> DEALER STANDS ON
+            17</span
+          >
+        </div>
+        <div class="felt">
+          <div class="hand-label dealer-label">
+            DEALER <span id="dealer-score" class="score">—</span>
+          </div>
+          <div
+            id="card-table"
+            role="img"
+            aria-label="An empty blackjack table"
+          ></div>
+          <div class="table-watermark" aria-hidden="true">
+            <span>♠</span><strong>BLACKJACK</strong
+            ><small>MAKE YOUR NEXT MOVE.</small>
+          </div>
+          <div class="hand-label player-label">
+            YOUR HAND <span id="player-score" class="score">—</span>
+          </div>
+          <div
+            class="table-status"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span id="status-icon">♢</span
+            ><span id="status">Choose your chips. The table is yours.</span>
+          </div>
+        </div>
+        <div class="controls">
+          <div class="wager">
+            <span class="eyebrow">YOUR BET <span id="bet-lock"></span></span>
+            <div
+              id="chips"
+              class="chips"
+              role="group"
+              aria-label="Choose your bet"
+            ></div>
+          </div>
+          <div class="actions">
+            <button id="deal" class="button primary" disabled>
+              Loading cards…</button
+            ><button id="hit" class="button primary" hidden>
+              Hit <kbd>H</kbd></button
+            ><button id="stand" class="button secondary" hidden>
+              Stand <kbd>S</kbd></button
+            ><button id="reset" class="button secondary" hidden>
+              Fresh start
+            </button>
+          </div>
+          <div class="bankroll">
+            <span class="eyebrow">YOUR BANKROLL</span
+            ><strong id="balance">1,000<span> chips</span></strong>
+          </div>
+        </div>
+      </section>
+      <footer>
+        <span>PLAY FOR THE THRILL. ALL CHIPS ARE MAKE-BELIEVE.</span
+        ><span
+          ><span id="session">0 hands · 0 wins</span
+          ><span class="footer-suit" aria-hidden="true">♣ ♦ ♥ ♠</span></span
+        >
+      </footer>
+    </main>
+    <dialog id="rules" aria-labelledby="rules-title">
+      <button id="close-rules" class="close-button" aria-label="Close rules">
+        ×
+      </button>
+      <p class="eyebrow">A QUICK HOUSE TOUR</p>
+      <h2 id="rules-title">Chase 21.</h2>
+      <p>
+        Get closer to 21 than the dealer without going over. Choose a bet, then
+        deal yourself in.
+      </p>
+      <dl>
+        <dt>Hit / H</dt>
+        <dd>Take another card. At 21, your hand stands automatically.</dd>
+        <dt>Stand / S</dt>
+        <dd>Keep your hand and let the dealer play.</dd>
+        <dt>The cards</dt>
+        <dd>
+          Face cards count as 10. Aces count as 1 or 11, whichever helps your
+          hand.
+        </dd>
+        <dt>The payout</dt>
+        <dd>
+          A win pays 1:1. A two-card blackjack pays 3:2. A tie returns your
+          whole bet.
+        </dd>
+        <dt>House rules</dt>
+        <dd>
+          One fresh deck per hand. Dealer stands on soft 17. No splitting,
+          doubling, or insurance.
+        </dd>
+      </dl>
+      <p class="rules-note">
+        Start with 1,000 pretend chips. Bets lock when you deal. Refreshing
+        starts a new session; if you run out, take a fresh start.
+      </p>
+    </dialog>
     <script type="module" src="/src/index.ts"></script>
-</body>
-
+  </body>
 </html>

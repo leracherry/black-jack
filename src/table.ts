@@ -1,108 +1,109 @@
-import * as PIXI from "pixi.js";
-import { Sprite } from "pixi.js";
-import { Deck } from "./deck";
+import { Application, Assets, Container, Graphics, Sprite } from 'pixi.js';
+import { RANKS, SUITS, type Card } from './cards';
+import type { Blackjack } from './game';
 
-export class Table extends PIXI.Container {
-  private hitButton: PIXI.Sprite = Sprite.from("assets/button.png");
-  private standButton: PIXI.Sprite = Sprite.from("assets/button.png");
-  private betButtonRight: PIXI.Sprite = Sprite.from("assets/bet_button.png");
-  private betButtonLeft: PIXI.Sprite = Sprite.from("assets/bet_button.png");
-  private bets: number[] = [1, 2, 5, 10, 20];
-  private deck: Deck = new Deck();
-  private currentBetIndex: number = 0;
+const DESKTOP_WIDTH = 960;
+const HEIGHT = 420;
 
-  private textBetValue = new PIXI.Text({ text: String(this.bets[this.currentBetIndex]), style: this.deck.textStyle });
+/** Only draws cards. Controls and scores stay in accessible HTML. */
+export class Table {
+  private width = DESKTOP_WIDTH;
+  private host!: HTMLElement;
+  private readonly app = new Application();
+  private readonly cards = new Container();
 
-  constructor() {
-    super();
-    this.addHitButton();
-    this.addStandButton();
-    this.addChild(this.deck);
-    this.addBetButtons();
+  async initialize(host: HTMLElement): Promise<void> {
+    this.host = host;
+    this.width = host.clientWidth < 600 ? 600 : DESKTOP_WIDTH;
+    host.style.aspectRatio = `${this.width} / ${HEIGHT}`;
+    await this.app.init({
+      width: this.width,
+      height: HEIGHT,
+      backgroundAlpha: 0,
+      antialias: true,
+      resolution: Math.min(window.devicePixelRatio || 1, 2),
+      autoDensity: true,
+      preference: 'webgl',
+    });
+    const urls = SUITS.flatMap((suit) =>
+      RANKS.map((rank) => `assets/cards/${rank}-${suit}.png`),
+    );
+    await Assets.load(urls.map((url) => `${import.meta.env.BASE_URL}${url}`));
+    host.append(this.app.canvas);
+    this.app.stage.addChild(this.cards);
+    this.renderEmpty();
   }
 
-  private addHitButton() {
-    this.hitButton.anchor.set(0.5);
-    this.hitButton.scale.set(0.8);
-    this.hitButton.interactive = true;
-    this.hitButton.cursor = "pointer";
-    this.addChild(this.hitButton);
-    this.hitButton.x = 350;
-    this.hitButton.y = 550;
-
-    const textHitBtn = new PIXI.Text({ text: "HIT", style: this.deck.textStyle });
-    textHitBtn.anchor.set(0.5);
-    this.hitButton.addChild(textHitBtn);
-
-    this.hitButton.on("pointerdown", (evt: MouseEvent) => {
-      this.deck.hit(this.bets[this.currentBetIndex]);
-    });
-  }
-
-  private addStandButton() {
-    this.standButton.anchor.set(0.5);
-    this.standButton.scale.set(0.85);
-    this.standButton.interactive = true;
-    this.standButton.cursor = "pointer";
-    this.addChild(this.standButton);
-    this.standButton.x = 500;
-    this.standButton.y = 550;
-
-    const textStandBtn = new PIXI.Text({ text: "STAND", style: this.deck.textStyle });
-    textStandBtn.anchor.set(0.5);
-    this.standButton.addChild(textStandBtn);
-
-    this.standButton.on("pointerdown", (evt: MouseEvent) => {
-      this.deck.stand(this.bets[this.currentBetIndex]);
-    });
-  }
-
-  private addBetButtons() {
-    this.betButtonRight.anchor.set(0.5);
-    this.betButtonRight.scale.set(0.07);
-    this.betButtonRight.interactive = true;
-    this.betButtonRight.cursor = "pointer";
-    this.addChild(this.betButtonRight);
-    this.betButtonRight.x = 150;
-    this.betButtonRight.y = 550;
-
-    this.betButtonRight.on("pointerdown", (evt: MouseEvent) => {
-      this.displayNextBet();
-    });
-
-    this.addChild(this.textBetValue);
-    this.textBetValue.x = 90;
-    this.textBetValue.y = 535;
-
-    this.betButtonLeft.rotation = 180 * PIXI.DEG_TO_RAD;
-    this.betButtonLeft.anchor.set(0.5);
-    this.betButtonLeft.scale.set(0.07);
-    this.betButtonLeft.interactive = true;
-    this.betButtonLeft.cursor = "pointer";
-    this.addChild(this.betButtonLeft);
-    this.betButtonLeft.x = 50;
-    this.betButtonLeft.y = 550;
-
-    this.betButtonLeft.on("pointerdown", (evt: MouseEvent) => {
-      this.displayPreviousBet();
-    });
-  }
-
-  private displayNextBet(): void {
-    this.currentBetIndex++;
-    if (this.currentBetIndex >= this.bets.length) {
-      this.currentBetIndex = 0;
+  render(game: Blackjack): void {
+    const width = this.host.clientWidth < 600 ? 600 : DESKTOP_WIDTH;
+    if (width !== this.width) {
+      this.width = width;
+      this.app.renderer.resize(width, HEIGHT);
+      this.host.style.aspectRatio = `${width} / ${HEIGHT}`;
     }
-    const nextBet: number = this.bets[this.currentBetIndex];
-    this.textBetValue.text = String(nextBet);
+    // Destroy display objects, retain cached textures for the next hand.
+    for (const child of this.cards.removeChildren())
+      child.destroy({ children: true });
+    if (game.phase === 'ready') return this.renderEmpty();
+    this.drawHand(game.dealer, 100, game.phase === 'playing');
+    this.drawHand(game.player, 315, false);
   }
 
-  private displayPreviousBet(): void {
-    this.currentBetIndex--;
-    if (this.currentBetIndex < 0) {
-      this.currentBetIndex = this.bets.length - 1;
+  private renderEmpty(): void {
+    for (const y of [100, 315]) {
+      for (const x of [this.width / 2 - 54, this.width / 2 + 54]) {
+        const outline = new Graphics()
+          .roundRect(x - 46, y - 66, 92, 132, 7)
+          .stroke({ color: 0xb3c9a1, alpha: 0.15, width: 1 });
+        this.cards.addChild(outline);
+      }
     }
-    const previousBet: number = this.bets[this.currentBetIndex];
-    this.textBetValue.text = String(previousBet);
+  }
+
+  private drawHand(hand: readonly Card[], y: number, hidden: boolean): void {
+    const gap = Math.min(
+      108,
+      (this.width - 160) / Math.max(hand.length - 1, 1),
+    );
+    hand.forEach((card, index) => {
+      const x = this.width / 2 + (index - (hand.length - 1) / 2) * gap;
+      const shadow = new Graphics()
+        .roundRect(x - 43, y - 60, 92, 132, 7)
+        .fill({ color: 0x001c13, alpha: 0.4 });
+      this.cards.addChild(shadow);
+      if (hidden && index === 1) {
+        const back = new Graphics()
+          .roundRect(x - 46, y - 66, 92, 132, 7)
+          .fill(0xe5dfc8)
+          .roundRect(x - 41, y - 61, 82, 122, 4)
+          .fill(0x173f32);
+        for (let dy = -51; dy <= 51; dy += 12) {
+          for (let dx = -30; dx <= 30; dx += 12) {
+            back
+              .poly([
+                x + dx,
+                y + dy - 3,
+                x + dx + 3,
+                y + dy,
+                x + dx,
+                y + dy + 3,
+                x + dx - 3,
+                y + dy,
+              ])
+              .fill({ color: 0xe2bf76, alpha: 0.5 });
+          }
+        }
+        this.cards.addChild(back);
+      } else {
+        const sprite = Sprite.from(
+          `${import.meta.env.BASE_URL}assets/cards/${card}.png`,
+        );
+        sprite.anchor.set(0.5);
+        sprite.position.set(x, y);
+        sprite.width = 92;
+        sprite.height = 132;
+        this.cards.addChild(sprite);
+      }
+    });
   }
 }
