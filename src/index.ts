@@ -143,7 +143,11 @@ document.addEventListener('keydown', (event) => {
 try {
   await table.initialize(host);
   render();
-  new ResizeObserver(() => table.render(game)).observe(host);
+  let resizeFrame = 0;
+  new ResizeObserver(() => {
+    cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(() => table.render(game));
+  }).observe(host);
 } catch (error) {
   console.error(error);
   element('status').textContent =
