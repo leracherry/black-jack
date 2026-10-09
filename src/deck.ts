@@ -33,16 +33,15 @@ export class Deck extends PIXI.Container {
   public textStyle: PIXI.TextStyle = new PIXI.TextStyle({
     fontSize: 30,
     fill: "#3a3a3a",
-    lineJoin: "round",
   });
 
-  private dealerSumText: PIXI.Text = new PIXI.Text("Dealer: ", this.textStyle);
-  private yourSumText: PIXI.Text = new PIXI.Text("You: ", this.textStyle);
-  private textBalance = new PIXI.Text("Balance: 1000", this.textStyle);
+  private dealerSumText: PIXI.Text = new PIXI.Text({ text: "Dealer: ", style: this.textStyle });
+  private yourSumText: PIXI.Text = new PIXI.Text({ text: "You: ", style: this.textStyle });
+  private textBalance = new PIXI.Text({ text: "Balance: 1000", style: this.textStyle });
   private userBalance: number = 1000;
   private betDone: boolean = false;
   private balanceUpdated: boolean = false;
-  private gameOverText = new PIXI.Text("", this.textStyle);
+  private gameOverText = new PIXI.Text({ text: "", style: this.textStyle });
 
   constructor() {
     super();

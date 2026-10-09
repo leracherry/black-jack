@@ -11,10 +11,7 @@ export class Table extends PIXI.Container {
   private deck: Deck = new Deck();
   private currentBetIndex: number = 0;
 
-  private textBetValue = new PIXI.Text(
-    this.bets[this.currentBetIndex],
-    this.deck.textStyle
-  );
+  private textBetValue = new PIXI.Text({ text: String(this.bets[this.currentBetIndex]), style: this.deck.textStyle });
 
   constructor() {
     super();
@@ -33,7 +30,7 @@ export class Table extends PIXI.Container {
     this.hitButton.x = 350;
     this.hitButton.y = 550;
 
-    const textHitBtn = new PIXI.Text("HIT", this.deck.textStyle);
+    const textHitBtn = new PIXI.Text({ text: "HIT", style: this.deck.textStyle });
     textHitBtn.anchor.set(0.5);
     this.hitButton.addChild(textHitBtn);
 
@@ -51,7 +48,7 @@ export class Table extends PIXI.Container {
     this.standButton.x = 500;
     this.standButton.y = 550;
 
-    const textStandBtn = new PIXI.Text("STAND", this.deck.textStyle);
+    const textStandBtn = new PIXI.Text({ text: "STAND", style: this.deck.textStyle });
     textStandBtn.anchor.set(0.5);
     this.standButton.addChild(textStandBtn);
 
@@ -97,7 +94,7 @@ export class Table extends PIXI.Container {
       this.currentBetIndex = 0;
     }
     const nextBet: number = this.bets[this.currentBetIndex];
-    this.textBetValue.text = nextBet;
+    this.textBetValue.text = String(nextBet);
   }
 
   private displayPreviousBet(): void {
@@ -106,6 +103,6 @@ export class Table extends PIXI.Container {
       this.currentBetIndex = this.bets.length - 1;
     }
     const previousBet: number = this.bets[this.currentBetIndex];
-    this.textBetValue.text = previousBet;
+    this.textBetValue.text = String(previousBet);
   }
 }

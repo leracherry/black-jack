@@ -3,18 +3,21 @@ import { Sprite } from "pixi.js";
 import { Table } from "./table";
 
 export class Game {
-  private app: PIXI.Application;
-  private table: Table = new Table();
-  private filtersContainer: PIXI.Container;
-  private dimmingLayer: PIXI.Graphics;
-  private startButton: PIXI.Sprite = Sprite.from("assets/start.png");
+  private app = new PIXI.Application();
+  private table!: Table;
+  private filtersContainer!: PIXI.Container;
+  private dimmingLayer!: PIXI.Graphics;
+  private startButton!: PIXI.Sprite;
 
-  constructor() {
-    this.app = new PIXI.Application({
+  async initialize() {
+    await PIXI.Assets.load(["assets/start.png", "assets/button.png", "assets/bet_button.png", "assets/text_space.png", ...["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"].flatMap(rank => ["C", "D", "H", "S"].map(suit => `assets/cards/${rank}-${suit}.png`)), "assets/cards/BACK.png"]);
+    this.table = new Table();
+    this.startButton = Sprite.from("assets/start.png");
+    await this.app.init({
       width: 900,
       height: 600,
       backgroundColor: "#48b362",
-      view: document.getElementById("game-canvas") as HTMLCanvasElement,
+      canvas: document.getElementById("game-canvas") as HTMLCanvasElement,
     });
 
     this.filtersContainer = new PIXI.Container();
@@ -22,14 +25,7 @@ export class Game {
 
     this.filtersContainer.addChild(this.table);
     this.dimmingLayer = new PIXI.Graphics();
-    this.dimmingLayer.beginFill(0x000000, 0.5);
-    this.dimmingLayer.drawRect(
-      0,
-      0,
-      this.app.renderer.width,
-      this.app.renderer.height
-    );
-    this.dimmingLayer.endFill();
+    this.dimmingLayer.rect(0, 0, 900, 600).fill({ color: 0x000000, alpha: 0.5 });
     this.dimmingLayer.visible = false;
     this.app.stage.addChild(this.dimmingLayer);
     this.initializeStartButton();
@@ -37,9 +33,9 @@ export class Game {
 
   private applyFilters(isDarkened: boolean) {
     if (isDarkened) {
-      const blurFilter = new PIXI.filters.BlurFilter();
+      const blurFilter = new PIXI.BlurFilter();
       blurFilter.blur = 5;
-      const colorMatrixFilter = new PIXI.filters.ColorMatrixFilter();
+      const colorMatrixFilter = new PIXI.ColorMatrixFilter();
       colorMatrixFilter.alpha = 0.5;
       colorMatrixFilter.brightness(-0.2, false);
       this.filtersContainer.filters = [blurFilter, colorMatrixFilter];
@@ -71,4 +67,5 @@ export class Game {
 }
 
 const game = new Game();
+await game.initialize();
 game.start();
